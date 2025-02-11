@@ -1,0 +1,155 @@
+<html>
+
+<head>
+  <title>Image Optimizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .upload-area {
+      border: 2px dashed #ccc;
+      padding: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .upload-area:hover {
+      background-color: #f9f9f9;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+
+    .options {
+      margin-top: 20px;
+    }
+
+    .option-btn {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .option-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .download-btn {
+      margin-top: 15px;
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .download-btn:hover {
+      background-color: #218838;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Image Optimizer</h1>
+    <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+      <p>Click to Upload an Image</p>
+    </div>
+    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="loadImage(event)">
+    <img id="originalImage" style="display: none;" />
+    <p id="errorMessage" class="error"></p>
+    <img id="optimizedImage" style="display: none;" />
+    <div id="options" class="options" style="display: none;">
+      <button class="option-btn" onclick="optimizeImage(0.75)">Optimize 25%</button>
+      <button class="option-btn" onclick="optimizeImage(0.5)">Optimize 50%</button>
+      <button class="option-btn" onclick="optimizeImage(0.25)">Optimize 75%</button>
+    </div>
+    <a id="downloadLink" class="download-btn" style="display: none;" download="optimized-image.jpg">Download Optimized
+      Image</a>
+  </div>
+
+  <script>
+    let originalImageData;
+    function loadImage(event) {
+      const file = event.target.files[0];
+      const originalImage = document.getElementById('originalImage');
+      const errorMessage = document.getElementById('errorMessage');
+      const options = document.getElementById('options');
+      const reader = new FileReader();
+
+      if (file) {
+        reader.onload = function (e) {
+
+          errorMessage.textContent = '';
+          originalImage.src = e.target.result;
+          originalImage.style.display = 'block';
+          originalImageData = e.target.result;
+          if (file.size < 2 * 1024 * 1024) {
+            errorMessage.textContent = 'Error: The image size is less than 2 MB.';
+            return;
+          }
+          else { options.style.display = 'block'; }
+        };
+
+        reader.readAsDataURL(file);
+      }
+    }
+    function optimizeImage(compressionRatio) {
+      const img = new Image();
+      img.src = originalImageData;
+
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Resize the image based on the compression ratio
+        canvas.width = img.width * compressionRatio;
+        canvas.height = img.height * compressionRatio;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Compress the image to 70% quality
+        const optimizedDataUrl = canvas.toDataURL('image/jpeg', compressionRatio);
+
+        // Display the optimized image
+        options.style.display = 'none';
+        const optimizedImage = document.getElementById('optimizedImage');
+        optimizedImage.src = optimizedDataUrl;
+        optimizedImage.style.display = 'block';
+        
+
+        // Update the download link
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.href = optimizedDataUrl;
+        downloadLink.style.display = 'inline-block';
+      };
+    }
+
+  </script>
+</body>
+
+</html>
